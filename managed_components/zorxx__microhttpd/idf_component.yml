@@ -1,0 +1,4 @@
+description: Tiny HTTP server
+license: MIT
+url: https://github.com/zorxx/microhttpd
+version: 1.0.0
