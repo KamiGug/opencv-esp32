@@ -25,6 +25,7 @@ using namespace cv;
 using std::cout;
 using std::cin;
 using std::endl;
+using std::string;
 
 
 //storage consts / variables
@@ -328,7 +329,7 @@ void initPictureNumbering() {
 }
 
 //shape detect function
-shape_t parseImage(const char *filepath) {
+shape_t parseImage(string filepath) {
     // cv::String file = filepath;
     cout << endl << "p1";
     // FILE *f = fopen(file.c_str(), "r");
