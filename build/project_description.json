@@ -1,7 +1,7 @@
 {
     "version":            "1.1",
     "project_name":       "opencv-esp32",
-    "project_version":    "1",
+    "project_version":    "47a320f-dirty",
     "project_path":       "/home/kk/my-projects/embedded/opencv-esp32",
     "idf_path":           "/home/kk/my-projects/embedded/esp-idf/v5.2/esp-idf",
     "build_dir":          "/home/kk/my-projects/embedded/opencv-esp32/build",
@@ -2175,18 +2175,6 @@
             "managed_priv_reqs": [],
             "include_dirs": [ "driver/include", "conversions/include" ]
         },
-        "zorxx__microhttpd": {
-            "alias": "idf::zorxx__microhttpd",
-            "target": "___idf_zorxx__microhttpd",
-            "prefix": "idf",
-            "dir": "/home/kk/my-projects/embedded/opencv-esp32/managed_components/zorxx__microhttpd",
-            "lib": "__idf_zorxx__microhttpd",
-            "reqs": [],
-            "priv_reqs": [],
-            "managed_reqs": [],
-            "managed_priv_reqs": [],
-            "include_dirs": [ "./include" ]
-        },
         "espressif__mdns": {
             "alias": "idf::espressif__mdns",
             "target": "___idf_espressif__mdns",
@@ -2198,6 +2186,18 @@
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "include_dirs": [ "include" ]
+        },
+        "zorxx__microhttpd": {
+            "alias": "idf::zorxx__microhttpd",
+            "target": "___idf_zorxx__microhttpd",
+            "prefix": "idf",
+            "dir": "/home/kk/my-projects/embedded/opencv-esp32/managed_components/zorxx__microhttpd",
+            "lib": "__idf_zorxx__microhttpd",
+            "reqs": [],
+            "priv_reqs": [],
+            "managed_reqs": [],
+            "managed_priv_reqs": [],
+            "include_dirs": [ "./include" ]
         }
     },
     "debug_prefix_map_gdbinit": ""

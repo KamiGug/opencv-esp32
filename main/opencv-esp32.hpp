@@ -36,7 +36,7 @@ using namespace std;
 // #define DATA3_PIN 13
 
 //define shape type
-enum shape_t {triangle, circle, unknown};
+enum shape_t {triangle_s, circle_s, unknown_s};
 
 //main loop function
 void loop(void);
@@ -58,7 +58,7 @@ void initPictureNumbering(void);
 //time functions
 
 //detect shape function
-shape_t parseImage(string filepath);
+shape_t parseImage(cv::String filepath);
 
 //helpers
 uint32_t stringToUint32(string input);

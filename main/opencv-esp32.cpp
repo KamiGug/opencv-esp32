@@ -1,4 +1,5 @@
 #undef EPS
+#include "opencv2/opencv.hpp"
 #include "opencv2/core.hpp"
 #include "opencv2/imgproc.hpp"
 #include "opencv2/imgcodecs.hpp"
@@ -8,6 +9,7 @@
 #include <string>
 #include "sdkconfig.h"
 #include <iostream>
+#include <ostream>
 #include <sys/unistd.h>
 #include <sys/stat.h>
 #include <esp_err.h>
@@ -19,6 +21,7 @@
 #include <sdmmc_cmd.h>
 #include "driver/sdmmc_host.h"
 #include <esp_vfs_fat.h>
+
 
 
 using namespace cv;
@@ -65,8 +68,9 @@ void app_main(void)
 {
     setup();
     // test_file();
-    parseImage("/SD/PHOTOT.BMP");
+    // parseImage("/SD/PHOTOT.BMP");
 
+    // parseImage("/SD/PHOTOT.BMP");
 
     // string debug[] = {
     //     "/SD/PHOTOC.bmp",
@@ -88,16 +92,16 @@ void app_main(void)
     // }
     // cout << "FAILURE!" <<endl;
     // return;
-    // cout << "m1";
-    // string fileName = getFileName("t");
-    // cout << "m2";
-    // shape_t shape = unknown;//parseImage(fileName);
-    // cout << "m3";
-    // cout << "triangle: " << writeShapeName(shape) << endl;
-    // return;
+
+
+    for (uint8_t i = 0; i<5; i++) {
+        cout << "bmp nr. " << Uint8ToString(i) << ":" << endl << std::flush;
+        cout << writeShapeName(parseImage(getFileName(Uint8ToString(i).c_str()))) << endl << std::flush;
+    }
+    // cout << "triangle: " << writeShapeName(parseImage(getFileName("t"))) << endl;
     // cout << "circle: " << writeShapeName(parseImage(getFileName("c"))) << endl;
     // cout << "random: " << writeShapeName(parseImage(getFileName(Uint16ToString(20)))) << endl;
-
+    return;
     // // while (true) loop();
 
     // /* Matrices initialization tests */
@@ -244,11 +248,11 @@ string getFileName(string post) {
 //helpers
 string writeShapeName(shape_t input) {
     switch (input) {
-        case shape_t::triangle:
+        case shape_t::triangle_s:
             return "triangle";
-        case shape_t::circle:
+        case shape_t::circle_s:
             return "circle";
-        case shape_t::unknown:
+        case shape_t::unknown_s:
             return "unknown";
     }
     return "";
@@ -329,17 +333,22 @@ void initPictureNumbering() {
 }
 
 //shape detect function
-shape_t parseImage(string filepath) {
+//cv::String filepath
+shape_t parseImage(cv::String filepath) {
     // cv::String file = filepath;
-    cout << endl << "p1";
+    cout << endl << "p1" << std::flush;
     // FILE *f = fopen(file.c_str(), "r");
     // if (f != NULL) {
     //     cout << "opened  with fopen: " << file << endl;
     //     fclose(f);
     // }
-    cout << "p2";
-    Mat img = imread(filepath);
-    cout << "p3";
+    cout << "p2" << std::flush;
+    // return unknown;
+    // cv::String filepath = "/SD/PHOTOT.BMP";
+    cout << endl << filepath << endl << std::flush;
+    Mat img = imread(filepath, IMREAD_GRAYSCALE);
+
+    cout << "p3" << std::flush;
     Mat imgT;
     // if(img.empty()) {
     //     cout << "Unable to read image: " << file << "!" << endl;
@@ -347,18 +356,19 @@ shape_t parseImage(string filepath) {
     // }
     // double thresh = 
     threshold(img, imgT, 100, 150, THRESH_BINARY);
-    cout << "p4";
+    cout << "p4" << std::flush;
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
+    cout << "p5" << std::flush;
     findContours(imgT, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
-    cout << "p5";
+    cout << "p6" << std::flush;
     cout << "Number of found shapes: " << contours.size() << endl;
 
     
     if (contours.size() <= 0) {
-        return unknown;
+        return shape_t::unknown_s;
     }
-    cout << "p6";
+    cout << "p7" << std::flush;
     vector<Point> conPoly;                      //polygon that detected in a shape
     RotatedRect ellipse;                        //elipse to check if object is round enough to be a circle
     double axis[2] = {0};
@@ -366,34 +376,85 @@ shape_t parseImage(string filepath) {
     double tmp_area;
     // vector<Rect> boundRect(contours.size());            
     double biggest_area = 0;
-    shape_t biggest_result = unknown;
+    double perimeter;
+    shape_t biggest_result = unknown_s;
     Point2f ellipse_def_points[4];
-    cout << "p7" << endl;
+    cout << "p8" << endl << std::flush;
     for (int i = 0; i < contours.size(); i++) {
+        cout << "p8.1" << std::flush;
         cout << i;
         tmp_area = contourArea(contours[i]);
+        cout << "p8.2" << std::flush;
         if(tmp_area > 200) {    //filter out noise (small objects)
+            cout << "p8.3" << std::flush;
+            perimeter = arcLength(contours[i], true);
+            cout << "p8.3.5" << std::flush;
             if (biggest_area > contourArea(contours[i])) continue;   //skip comparisons if it is not the biggest object on the image 
-            approxPolyDP(contours[i], conPoly, 0.02 * arcLength(contours, true), true);
+            cout << "p8.4" << std::flush;
+            approxPolyDP(contours[i], conPoly, 0.02 * perimeter, true);
+            cout << "size: " << conPoly.size() << std::flush;
+            cout << "p8.5" << std::flush;
             if ((uint8_t)conPoly.size() == 3) {
-                biggest_result = shape_t::triangle;
+                cout << "p8.6" << std::flush;
+                biggest_result = shape_t::triangle_s;
+                cout << "p8.7" << std::flush;
                 biggest_area = tmp_area;
             }
-            else {
-                ellipse = fitEllipse(contours[i]);
-                ellipse.points(ellipse_def_points);
-                axis[0] = sqrt(pow((double)ellipse_def_points[0].x - (double)ellipse_def_points[1].x, 2) + pow((double)ellipse_def_points[0].y - (double)ellipse_def_points[1].y, 2));
-                axis[1] = sqrt(pow((double)ellipse_def_points[0].x - (double)ellipse_def_points[3].x, 2) + pow((double)ellipse_def_points[0].y - (double)ellipse_def_points[3].y, 2));
-                if (axis[1]>axis[0]) {
-                    swap(axis[1], axis[0]);
-                }
-                eccentricity = sqrt(1- (axis[1] * axis[1])/(axis[0] * axis[0]));
-                if (eccentricity < 0.07) {
-                    biggest_result = shape_t::circle;
-                    biggest_area = tmp_area;
-                }
-            }
+            // else {
+            //     cout << "p8.8" << std::flush;
+            //     cout << std::endl;
+            //     for (u_int16_t i = 0; i < contours.size(); i++)
+            //     {
+            //         for (u_int16_t j = 0; j < (contours[i]).size(); j++)
+            //         {
+            //             cout << contours[i][j] << ",";
+            //         }
+            //         cout << "|" << std::endl;
+            //     }
+            //     cout << std::flush;
+                
+
+            //     ellipse = fitEllipse(contours[i]);
+
+
+            //     cout << "p8.9" << std::flush;
+            //     ellipse.points(ellipse_def_points);
+            //     cout << "p8.10" << std::flush;
+            //     axis[0] = sqrt(pow((double)ellipse_def_points[0].x - (double)ellipse_def_points[1].x, 2) + pow((double)ellipse_def_points[0].y - (double)ellipse_def_points[1].y, 2));
+            //     axis[1] = sqrt(pow((double)ellipse_def_points[0].x - (double)ellipse_def_points[3].x, 2) + pow((double)ellipse_def_points[0].y - (double)ellipse_def_points[3].y, 2));
+            //     cout << "p8.11" << std::flush;
+            //     if (axis[1]>axis[0]) {
+            //         swap(axis[1], axis[0]);
+            //     }
+            //     cout << "p8.12" << std::flush;
+            //     eccentricity = sqrt(1- (axis[1] * axis[1])/(axis[0] * axis[0]));
+            //     if (eccentricity < 0.07) {
+            //         cout << "p8.13" << std::flush;
+            //         biggest_result = shape_t::circle_s;
+            //         biggest_area = tmp_area;
+            //     }
+            //     cout << "p8.14" << std::flush;
+            // }
+
+            
         }
+    }  
+    cout << "p9" << std::flush;
+
+    vector<Vec3f> circles;
+    cout << "p9.1" << std::flush;
+    HoughCircles(imgT, circles, HOUGH_GRADIENT, 1, imgT.rows/16, 100, 30, 1, 30);
+    for( size_t i = 0; i < circles.size(); i++ ) {
+        cout << "p9.2" << std::flush;
+        tmp_area = circles[i][2]*circles[i][2] * 3.14;
+        if (tmp_area > biggest_area) {
+            cout << "p9.4" << std::flush;
+            biggest_area = tmp_area;
+            biggest_result = circle_s;
+        }
+        cout << "p9.5" << std::flush;
     }
+
+    cout << "p10" << std::flush;
     return biggest_result;
 }
