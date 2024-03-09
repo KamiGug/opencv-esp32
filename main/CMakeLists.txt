@@ -18,6 +18,7 @@ add_prebuilt_library(libpng "opencv/3rdparty/liblibpng.a" PRIV_REQUIRES esp_rom)
 
 # target_link_libraries(${COMPONENT_LIB} pthread)             #chat gpt solution    #and adding as a linker flag: -lpthread 
 # target_link_libraries(${COMPONENT_LIB} freertos)                #that too
+# target_link_libraries(${COMPONENT_LIB} unistd)
 
 set(IMGCODEC_DEP libpng libzlib)
 target_link_libraries(opencv_imgcodecs INTERFACE ${IMGCODEC_DEP})
@@ -25,5 +26,5 @@ target_link_libraries(opencv_imgcodecs INTERFACE ${IMGCODEC_DEP})
 set(CORE_DEP libzlib)
 target_link_libraries(opencv_core INTERFACE ${CORE_DEP})
 
-set(OPENCV_DEP opencv_imgcodecs opencv_imgproc opencv_core sysconf)
+set(OPENCV_DEP opencv_imgcodecs opencv_imgproc opencv_core)
 target_link_libraries(${COMPONENT_LIB} ${OPENCV_DEP})

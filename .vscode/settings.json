@@ -66,6 +66,15 @@
     "streambuf": "cpp",
     "thread": "cpp",
     "cinttypes": "cpp",
-    "typeinfo": "cpp"
+    "typeinfo": "cpp",
+    "fstream": "cpp",
+    "charconv": "cpp",
+    "set": "cpp",
+    "format": "cpp",
+    "future": "cpp",
+    "iomanip": "cpp",
+    "cfenv": "cpp",
+    "variant": "cpp",
+    "malloc.h": "c"
   }
 }

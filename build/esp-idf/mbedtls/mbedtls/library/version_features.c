@@ -1,1 +1,0 @@
-/home/kk/my-projects/embedded/esp-idf/v5.2/esp-idf/components/mbedtls/mbedtls/library/version_features.c

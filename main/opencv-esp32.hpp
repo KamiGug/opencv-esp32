@@ -18,13 +18,17 @@
 #include <sdmmc_cmd.h>
 #include "driver/sdmmc_host.h"
 #include <esp_vfs_fat.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 using namespace cv;
 using namespace std;
 
 //network consts
-#define SSID = "HUAWEI-2.4G-9e9d";
-#define PASSWORD = "acce69e1";
+#define SSID = "HUAWEI-2.4G-9e9d"
+#define PASSWORD = "acce69e1"
+
+
 
 //define pins
 // #define CLK_PIN 14
@@ -38,8 +42,6 @@ using namespace std;
 //define shape type
 enum shape_t {triangle_s, circle_s, unknown_s};
 
-//main loop function
-void loop(void);
 //init functions
 void setup(void);
 bool init_dns(void);
@@ -48,17 +50,32 @@ bool init_server(void);
 bool init_camera(void);
 bool init_storage(void);
 void critical_failure(void);
+void wifi_event_handler(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id,void *event_data);
 //storage functions
-string getFileNameID(int i);
-string getFileName(string post);
+string getFileNameBmp(string post);
+string getFileNamePng(string post);
+
 //numbering functions
 uint16_t getPictureNumber(void);
 void incPictureNumber(void);
+void decPictureNumber(void);
 void initPictureNumbering(void);
-//time functions
+//camera functions
+void takePhotoPng(bool shouldIncrement);
+void takePhotoBmp(bool shouldIncrement);
+void takePhotoToMat(Mat& result);
+char* generateBmpHeader(u_int32_t map_size);
 
 //detect shape function
 shape_t parseImage(cv::String filepath);
+shape_t parseImageFromMat(cv::Mat &img);
+
+//server functions
+static void send_not_found(tMicroHttpdClient client, const char *uri);
+static void handle_root(tMicroHttpdClient client, const char *uri,
+const char *param_list[], const uint32_t param_count, const char *source_address, void *cookie);
+static void handle_photo(tMicroHttpdClient client, const char *uri,
+const char *param_list[], const uint32_t param_count, const char *source_address, void *cookie);
 
 //helpers
 uint32_t stringToUint32(string input);
@@ -68,7 +85,16 @@ string Uint32ToString(uint32_t input);
 string Uint16ToString(uint16_t input);
 string Uint8ToString(uint8_t input);
 string writeShapeName(shape_t input);
+string IPtoString(uint8_t *ip);
+void TaskHttpServer(void * parameters);
+
 
 extern "C" {
     void app_main(void);
 }
+
+static tMicroHttpdGetHandlerEntry get_handler_list[] =
+{
+   { "/photo", handle_photo, NULL },
+   { "/", handle_root, NULL}
+};
